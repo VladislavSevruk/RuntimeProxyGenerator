@@ -56,6 +56,7 @@ public final class JavaSourceCompiler {
      *
      * @param name    <code>String</code> with expected binary name of the class.
      * @param content <code>String</code> with class source code.
+     * @param <T>     target class type.
      * @return compiled <code>Class</code>.
      */
     @SuppressWarnings("unchecked")
