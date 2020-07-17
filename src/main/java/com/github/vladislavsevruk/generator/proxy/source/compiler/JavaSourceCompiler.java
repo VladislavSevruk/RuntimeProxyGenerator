@@ -27,7 +27,6 @@ package com.github.vladislavsevruk.generator.proxy.source.compiler;
 import com.github.vladislavsevruk.generator.proxy.source.file.JavaByteFileManager;
 import com.github.vladislavsevruk.generator.proxy.source.file.JavaByteFileObject;
 import com.github.vladislavsevruk.generator.proxy.source.file.JavaSourceFileObject;
-import com.github.vladislavsevruk.generator.proxy.source.loader.JavaByteClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,11 +55,9 @@ public final class JavaSourceCompiler {
      *
      * @param name    <code>String</code> with expected binary name of the class.
      * @param content <code>String</code> with class source code.
-     * @param <T>     target class type.
-     * @return compiled <code>Class</code>.
+     * @return <code>JavaByteFileObject</code> with compiled byte code.
      */
-    @SuppressWarnings("unchecked")
-    public static <T> Class<? extends T> compile(String name, String content) {
+    public static JavaByteFileObject compile(String name, String content) {
         logger.debug("Compiling '{}' class.", name);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
@@ -72,7 +69,7 @@ public final class JavaSourceCompiler {
                     Collections.singletonList(javaFileObject));
             if (Boolean.TRUE.equals(compilationTask.call())) {
                 logger.debug("Successfully compiled '{}' class.", name);
-                return (Class<? extends T>) JavaByteClassLoader.instance().defineClass(name, javaByteFileObject);
+                return javaByteFileObject;
             } else {
                 logger.debug("Failed to compile '{}' class.", name);
                 logCompileErrors(diagnostics);

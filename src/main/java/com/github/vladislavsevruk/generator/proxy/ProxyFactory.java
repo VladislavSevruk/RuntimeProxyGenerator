@@ -25,7 +25,8 @@ package com.github.vladislavsevruk.generator.proxy;
 
 import com.github.vladislavsevruk.generator.proxy.source.compiler.JavaSourceCompiler;
 import com.github.vladislavsevruk.generator.proxy.source.generator.ProxySourceCodeGenerator;
-import com.github.vladislavsevruk.generator.proxy.util.ExecutableUtil;
+import com.github.vladislavsevruk.generator.proxy.source.loader.JavaByteClassLoader;
+import com.github.vladislavsevruk.generator.proxy.util.ClassMemberUtil;
 import com.github.vladislavsevruk.resolver.resolver.ExecutableTypeResolver;
 import com.github.vladislavsevruk.resolver.resolver.ExecutableTypeResolverImpl;
 import com.github.vladislavsevruk.resolver.type.TypeMeta;
@@ -35,11 +36,14 @@ import org.apache.logging.log4j.Logger;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +83,13 @@ public final class ProxyFactory<T> {
     }
 
     @SuppressWarnings("unchecked")
+    private Class<? extends T> compileClass(String proxyClassName, String proxyClassContent) {
+        return (Class<? extends T>) Optional.ofNullable(JavaSourceCompiler.compile(proxyClassName, proxyClassContent))
+                .map(compiledByteFileObject -> JavaByteClassLoader.instance()
+                        .defineClass(proxyClassName, compiledByteFileObject)).orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
     private T createInstance(Class<?> clazzToCreate, Class<?>[] receivedParameterTypes, Object[] args) {
         try {
             return (T) getConstructor(clazzToCreate, receivedParameterTypes).newInstance(args);
@@ -94,7 +105,7 @@ public final class ProxyFactory<T> {
                 Arrays.asList(receivedParameterTypes));
         Constructor<?> firstFoundCandidate = null;
         for (Constructor<?> constructor : clazzToCreate.getDeclaredConstructors()) {
-            if (!ExecutableUtil.isNonPrivate(constructor)) {
+            if (!ClassMemberUtil.isNonPrivate(constructor)) {
                 continue;
             }
             List<TypeMeta<?>> typeMetas = executableTypeResolver.getParameterTypes(clazzToCreate, constructor);
@@ -115,39 +126,42 @@ public final class ProxyFactory<T> {
     }
 
     private Class<?> getProxyClass() {
+        if (Modifier.isFinal(clazz.getModifiers())) {
+            logger.warn("'{}' class is final.", clazz.getName());
+            return clazz;
+        }
         String proxyClassName = String.format("%s.%sProxy", clazz.getPackage().getName(), clazz.getSimpleName());
         if (!isAlreadyCompiled(proxyClassName)) {
             String proxyClassContent = proxyContentGenerator.generate(clazz);
-            Class<? extends T> compiledClass = JavaSourceCompiler.compile(proxyClassName, proxyClassContent);
+            Class<? extends T> compiledClass = compileClass(proxyClassName, proxyClassContent);
             Class<? extends T> resultedClass = compiledClass != null ? compiledClass : clazz;
             RESOLVED_CLASSES.put(proxyClassName, resultedClass);
         }
         return RESOLVED_CLASSES.get(proxyClassName);
     }
 
-    private boolean isExactMatchingParameters(List<TypeMeta<?>> typeMetas, Class<?>[] receivedParameterTypes) {
+    private boolean isAllMatchCondition(List<TypeMeta<?>> typeMetas, Class<?>[] receivedParameterTypes,
+            BiPredicate<TypeMeta<?>, Class<?>> condition) {
         if (typeMetas.size() != receivedParameterTypes.length) {
             return false;
         }
         for (int i = 0; i < typeMetas.size(); ++i) {
-            if (!typeMetas.get(i).getType().equals(receivedParameterTypes[i])) {
+            if (condition.test(typeMetas.get(i), receivedParameterTypes[i])) {
                 return false;
             }
         }
         return true;
     }
 
+    private boolean isExactMatchingParameters(List<TypeMeta<?>> typeMetas, Class<?>[] receivedParameterTypes) {
+        return isAllMatchCondition(typeMetas, receivedParameterTypes,
+                (typeMeta, parameterType) -> !typeMeta.getType().equals(parameterType));
+    }
+
     private boolean isMatchingParameters(List<TypeMeta<?>> typeMetas, Class<?>[] receivedParameterTypes) {
-        if (typeMetas.size() != receivedParameterTypes.length) {
-            return false;
-        }
-        for (int i = 0; i < typeMetas.size(); ++i) {
-            Class<?> parameterType = receivedParameterTypes[i];
-            if (parameterType != null && !typeMetas.get(i).getType().isAssignableFrom(parameterType)) {
-                return false;
-            }
-        }
-        return true;
+        return isAllMatchCondition(typeMetas, receivedParameterTypes,
+                (typeMeta, parameterType) -> parameterType != null && !typeMeta.getType()
+                        .isAssignableFrom(parameterType));
     }
 
     private void logExactMatchingConstructor(List<TypeMeta<?>> typeMetas) {
