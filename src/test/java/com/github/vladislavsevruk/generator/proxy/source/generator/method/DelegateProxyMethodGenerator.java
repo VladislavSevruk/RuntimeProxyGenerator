@@ -21,18 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.vladislavsevruk.generator.proxy.source.generator;
+package com.github.vladislavsevruk.generator.proxy.source.generator.method;
 
-import com.github.vladislavsevruk.generator.java.generator.ClassElementGenerator;
-import com.github.vladislavsevruk.generator.proxy.source.generator.method.DelegateProxyMethodGenerator;
+import com.github.vladislavsevruk.generator.java.config.JavaClassGeneratorConfig;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.lang.reflect.Method;
 
-public class SimpleProxySourceTestGenerator extends BaseProxySourceCodeGenerator {
+public class DelegateProxyMethodGenerator extends AbstractProxyMethodGenerator {
+
+    public DelegateProxyMethodGenerator(Class<?> delegatedClass) {
+        super(delegatedClass);
+    }
 
     @Override
-    protected Collection<ClassElementGenerator> getMethodsDeclaration(Class<?> clazz) {
-        return Collections.singletonList(new DelegateProxyMethodGenerator(clazz));
+    protected String getProxyMethodBodyContent(JavaClassGeneratorConfig config, Method originalMethod,
+            String delegateCall) {
+        return String.format("%s%s;", getReturnKeyWordIfRequired(originalMethod), delegateCall);
     }
 }

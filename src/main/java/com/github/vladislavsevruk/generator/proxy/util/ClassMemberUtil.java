@@ -24,19 +24,36 @@
 package com.github.vladislavsevruk.generator.proxy.util;
 
 import java.lang.reflect.Executable;
+import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Utility methods for getting characteristics of methods and constructors.
+ * Utility methods for getting characteristics of class members.
  */
-public final class ExecutableUtil {
+public final class ClassMemberUtil {
 
     private static final List<Method> OBJECT_METHODS = Arrays.asList(Object.class.getMethods());
 
-    private ExecutableUtil() {
+    private ClassMemberUtil() {
+    }
+
+    /**
+     * Generates string with type variables declaration for received class member.
+     *
+     * @param genericDeclaration <code>GenericDeclaration</code> with type variables.
+     * @return <code>String</code> with type variables declaration.
+     */
+    public static String generateTypeVariablesDeclaration(GenericDeclaration genericDeclaration) {
+        String typeVariablesDeclaration = Arrays.stream(genericDeclaration.getTypeParameters())
+                .map(ClassMemberUtil::generateTypeVariableDeclaration).collect(Collectors.joining(", "));
+        return typeVariablesDeclaration.isEmpty() ? typeVariablesDeclaration
+                : String.format("<%s>", typeVariablesDeclaration);
     }
 
     /**
@@ -78,5 +95,13 @@ public final class ExecutableUtil {
      */
     public static boolean isNonStatic(Executable executable) {
         return !Modifier.isStatic(executable.getModifiers());
+    }
+
+    private static String generateTypeVariableDeclaration(TypeVariable<? extends GenericDeclaration> typeVariable) {
+        Type bound = typeVariable.getBounds()[0];
+        if (Class.class.isAssignableFrom(bound.getClass()) && Object.class.equals(bound)) {
+            return typeVariable.getName();
+        }
+        return String.format("%s extends %s", typeVariable.getName(), bound.getTypeName());
     }
 }

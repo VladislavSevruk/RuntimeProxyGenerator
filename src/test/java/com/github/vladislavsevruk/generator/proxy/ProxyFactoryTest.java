@@ -30,6 +30,8 @@ import com.github.vladislavsevruk.generator.proxy.source.generator.SimpleProxySo
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Constructor;
+
 class ProxyFactoryTest {
 
     @Test
@@ -49,6 +51,13 @@ class ProxyFactoryTest {
     void createProxyConstructorWithNonMatchingParametersNumberTest() {
         ProxyFactory<TestClass> proxyFactory = newProxyFactory(TestClass.class);
         Assertions.assertThrows(IllegalArgumentException.class, () -> proxyFactory.newInstance(1, 1));
+    }
+
+    @Test
+    void createProxyConstructorWithNullParameterTest() {
+        ProxyFactory<TestClass> proxyFactory = newProxyFactory(TestClass.class);
+        TestClass testClass = proxyFactory.newInstance((Object) null);
+        Assertions.assertNotEquals(TestClass.class, testClass.getClass());
     }
 
     @Test
@@ -84,6 +93,19 @@ class ProxyFactoryTest {
         ProxyFactory<TestClass> proxyFactory = newProxyFactory(TestClass.class);
         TestClass testClass = proxyFactory.newInstance();
         Assertions.assertNotEquals(TestClass.class, testClass.getClass());
+    }
+
+    @Test
+    void pickConstructorsTest() {
+        ProxyFactory<TestClass> proxyFactory = newProxyFactory(TestClass.class);
+        Constructor<? extends TestClass> constructor1 = proxyFactory.getConstructor(Number.class);
+        Constructor<? extends TestClass> constructor2 = proxyFactory.getConstructor(Integer.class);
+        Constructor<? extends TestClass> constructor3 = proxyFactory.getConstructor(Boolean.class);
+        Constructor<? extends TestClass> constructor4 = proxyFactory.getConstructor();
+        Assertions.assertEquals(constructor1, constructor2);
+        Assertions.assertNotEquals(constructor2, constructor3);
+        Assertions.assertNotEquals(constructor2, constructor4);
+        Assertions.assertNotEquals(constructor3, constructor4);
     }
 
     private <T> ProxyFactory<T> newProxyFactory(Class<T> clazz) {
