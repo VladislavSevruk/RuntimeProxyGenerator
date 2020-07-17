@@ -82,8 +82,8 @@ public class LoggingProxyMethodGenerator extends AbstractProxyMethodGenerator {
     @Override
     protected String getProxyMethodBodyContent(JavaClassGeneratorConfig config, Method originalMethod,
             String delegateCall) {
-        StringBuilder stringBuilder = new StringBuilder("logger.debug(\"Calling '").append(originalMethod.getName())
-                .append("' method.\");\n");
+        StringBuilder stringBuilder = new StringBuilder("logger.debug(\"Calling '")
+                .append(originalMethod.getName()).append("' method.\");\n");
         return doubleIndents(stringBuilder, config).append(getReturnKeyWordIfRequired(originalMethod))
                 .append(delegateCall).append(";").toString();
     }
@@ -95,13 +95,14 @@ public class LoggingProxySourceGenerator extends BaseProxySourceCodeGenerator {
     @Override
     protected Collection<ClassImportGenerator> getImportsDeclaration(Class<?> clazz) {
         return Collections.singletonList((config, schemaObject) -> Arrays
-                .asList("import org.apache.logging.log4j.LogManager;\n", "import org.apache.logging.log4j.Logger;\n"));
+                .asList("import org.apache.logging.log4j.LogManager;\n",
+                        "import org.apache.logging.log4j.Logger;\n"));
     }
 
     // overriding generators for fields
     protected Collection<ClassElementGenerator> getFieldsDeclaration(Class<?> clazz) {
-        return Collections.singletonList((config, schemaObject) -> String
-                .format("%sprivate static final Logger logger = LogManager.getLogger(%s.class);%n%n",
+        return Collections.singletonList((config, schemaObject) -> String.format(
+                        "%sprivate static final Logger logger = LogManager.getLogger(%s.class);%n%n",
                         config.getIndent().value(), schemaObject.getName()));
     }
 
