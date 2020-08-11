@@ -23,8 +23,8 @@
  */
 package com.github.vladislavsevruk.generator.proxy.source.generator.provider;
 
+import com.github.vladislavsevruk.generator.java.generator.ClassElementCollectionGenerator;
 import com.github.vladislavsevruk.generator.java.generator.ClassElementGenerator;
-import com.github.vladislavsevruk.generator.java.generator.ClassImportGenerator;
 import com.github.vladislavsevruk.generator.java.provider.JavaClassContentGeneratorProvider;
 import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import lombok.Getter;
@@ -50,9 +50,9 @@ public class ClonedJavaClassContentGeneratorProvider implements JavaClassContent
     @Getter
     private Collection<ClassElementGenerator> constructorGenerators;
     @Getter
-    private Collection<ClassElementGenerator> fieldGenerators;
+    private Collection<ClassElementCollectionGenerator> fieldGenerators;
     @Getter
-    private Collection<ClassImportGenerator> importGenerators;
+    private Collection<ClassElementCollectionGenerator> importGenerators;
     private Predicate<SchemaObject> matchesFunction;
     @Getter
     private Collection<ClassElementGenerator> methodGenerators;
