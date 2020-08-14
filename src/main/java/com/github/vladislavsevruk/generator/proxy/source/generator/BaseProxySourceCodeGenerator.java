@@ -26,8 +26,8 @@ package com.github.vladislavsevruk.generator.proxy.source.generator;
 import com.github.vladislavsevruk.generator.java.JavaClassContentGenerator;
 import com.github.vladislavsevruk.generator.java.config.JavaClassGeneratorConfig;
 import com.github.vladislavsevruk.generator.java.context.ClassGenerationContextManager;
+import com.github.vladislavsevruk.generator.java.generator.ClassElementCollectionGenerator;
 import com.github.vladislavsevruk.generator.java.generator.ClassElementGenerator;
-import com.github.vladislavsevruk.generator.java.generator.ClassImportGenerator;
 import com.github.vladislavsevruk.generator.java.provider.JavaClassContentGeneratorProvider;
 import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.source.generator.constructor.ProxyClassConstructorGenerator;
@@ -66,13 +66,13 @@ public abstract class BaseProxySourceCodeGenerator implements ProxySourceCodeGen
     }
 
     @SuppressWarnings("unused")
-    protected Collection<ClassElementGenerator> getFieldsDeclaration(Class<?> clazz) {
+    protected Collection<ClassElementCollectionGenerator> getFieldsDeclaration(Class<?> clazz) {
         // no fields by default
         return Collections.emptyList();
     }
 
     @SuppressWarnings("unused")
-    protected Collection<ClassImportGenerator> getImportsDeclaration(Class<?> clazz) {
+    protected Collection<ClassElementCollectionGenerator> getImportsDeclaration(Class<?> clazz) {
         // no imports by default
         return Collections.emptyList();
     }
