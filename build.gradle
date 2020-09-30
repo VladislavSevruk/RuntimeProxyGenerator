@@ -9,9 +9,22 @@ plugins {
 sourceCompatibility = "${javaVersion}"
 targetCompatibility = "${javaVersion}"
 
+def ossrhCredentials = {
+    username = project.hasProperty('ossrhUsername') ? project.getProperty('ossrhUsername') : ''
+    password = project.hasProperty('ossrhPassword') ? project.getProperty('ossrhPassword') : ''
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        credentials(ossrhCredentials)
+    }
+    maven {
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        credentials(ossrhCredentials)
+    }
 }
 
 java {
@@ -40,7 +53,8 @@ dependencies {
             "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     )
     api(
-            "com.github.vladislavsevruk:type-resolver:${typeResolverVersion}"
+            "com.github.vladislavsevruk:type-resolver:${typeResolverVersion}",
+            "com.github.vladislavsevruk:java-class-generator:${javaClassGeneratorVersion}"
     )
 }
 
@@ -61,11 +75,6 @@ test {
     useJUnit()
     useJUnitPlatform()
     maxHeapSize = '64m'
-}
-
-def ossrhCredentials = {
-    username = project.hasProperty('ossrhUsername') ? project.getProperty('ossrhUsername') : ''
-    password = project.hasProperty('ossrhPassword') ? project.getProperty('ossrhPassword') : ''
 }
 
 publishing {
