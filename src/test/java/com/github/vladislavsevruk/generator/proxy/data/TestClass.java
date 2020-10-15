@@ -24,8 +24,10 @@
 package com.github.vladislavsevruk.generator.proxy.data;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 
-public class TestClass<T> {
+public class TestClass<T, V extends Exception> {
 
     public TestClass() {
     }
@@ -55,6 +57,9 @@ public class TestClass<T> {
         return null;
     }
 
+    public void methodWithClassTypeVariableThrowClause() throws V {
+    }
+
     public <U> void methodWithMethodTypeVariableArg(U arg) {
     }
 
@@ -62,21 +67,45 @@ public class TestClass<T> {
         return null;
     }
 
+    public <U extends Exception> void methodWithMethodTypeVariableThrowClause() throws U {
+    }
+
     public void methodWithOneArg(String one) {
+    }
+
+    public void methodWithParameterizedClassTypeVariableArg(List<T> arg) {
+    }
+
+    public List<T> methodWithParameterizedClassTypeVariableReturnType() {
+        return null;
+    }
+
+    public <U> void methodWithParameterizedMethodTypeVariableArg(List<U> arg) {
+    }
+
+    public <U> List<U> methodWithParameterizedMethodTypeVariableReturnType() {
+        return null;
     }
 
     public String methodWithReturnType() {
         return null;
     }
 
+    public <T> void methodWithThatCoversClassTypeVariable(T arg) {
+    }
+
     public void methodWithThrowClause() throws IOException {
         throw new IOException();
     }
 
-    public void methodWithTwoArgs(String one, String two) {
+    public void methodWithThrowClauseSeveralExceptions(boolean flag) throws IOException, ParseException {
+        if (flag) {
+            throw new ParseException("", 0);
+        }
+        throw new IOException();
     }
 
-    public <U extends Exception> void methodWithTypeVariableThrowClause() throws U {
+    public void methodWithTwoArgs(String one, String two) {
     }
 
     public void methodWithVararg(String... args) {
