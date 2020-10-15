@@ -27,29 +27,34 @@ import com.github.vladislavsevruk.generator.java.config.JavaClassGeneratorConfig
 import com.github.vladislavsevruk.generator.java.generator.method.BaseMethodGenerator;
 import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.util.ClassMemberUtil;
-import lombok.EqualsAndHashCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.github.vladislavsevruk.resolver.resolver.executable.BaseExecutableTypeResolver;
+import com.github.vladislavsevruk.resolver.resolver.executable.ExecutableStringRepresentationResolver;
+import lombok.extern.log4j.Log4j2;
 
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Contains base logic for generating proxy methods with ability to delegate call to initial class.
  */
-@EqualsAndHashCode(callSuper = true)
+@Log4j2
 public abstract class AbstractProxyMethodGenerator extends BaseMethodGenerator {
 
-    private static final Logger logger = LogManager.getLogger(AbstractProxyMethodGenerator.class);
-
     private Class<?> delegatedClass;
+    private BaseExecutableTypeResolver<String> executableResolver;
 
-    public AbstractProxyMethodGenerator(Class<?> delegatedClass) {
+    protected AbstractProxyMethodGenerator(Class<?> delegatedClass) {
+        this(delegatedClass, new ExecutableStringRepresentationResolver());
+    }
+
+    protected AbstractProxyMethodGenerator(Class<?> delegatedClass,
+            BaseExecutableTypeResolver<String> executableResolver) {
         this.delegatedClass = delegatedClass;
+        this.executableResolver = executableResolver;
     }
 
     /**
@@ -57,7 +62,7 @@ public abstract class AbstractProxyMethodGenerator extends BaseMethodGenerator {
      */
     @Override
     public String generate(JavaClassGeneratorConfig config, SchemaObject schemaObject) {
-        logger.debug("Generating proxy methods for {} class.", schemaObject.getName());
+        log.debug("Generating proxy methods for {} class.", schemaObject.getName());
         StringBuilder stringBuilder = new StringBuilder();
         Arrays.stream(delegatedClass.getMethods()).filter(ClassMemberUtil::isNonObjectMethod)
                 .filter(ClassMemberUtil::isNonStatic).filter(ClassMemberUtil::isNonFinal)
@@ -74,30 +79,44 @@ public abstract class AbstractProxyMethodGenerator extends BaseMethodGenerator {
     }
 
     private void appendMethod(JavaClassGeneratorConfig config, StringBuilder stringBuilder, Method originalMethod) {
-        String parameters = Arrays.stream(originalMethod.getParameters()).map(Parameter::toString)
-                .collect(Collectors.joining(", "));
         String parameterNames = Arrays.stream(originalMethod.getParameters()).map(Parameter::getName)
                 .collect(Collectors.joining(", "));
+        String parameters = generateParameters(originalMethod, originalMethod.getParameters());
         String typeVariablesDeclaration = getTypeVariables(originalMethod);
-        String throwsClause = Arrays.stream(originalMethod.getAnnotatedExceptionTypes()).map(AnnotatedType::getType)
-                .map(Type::getTypeName).collect(Collectors.joining(", "));
-        if (!throwsClause.isEmpty()) {
-            throwsClause = String.format("throws %s ", throwsClause);
-        }
+        String throwsClause = generateThrowClause(originalMethod);
         String indent = config.getIndent().value();
         addOverrideAnnotation(stringBuilder, config);
-        stringBuilder.append(indent).append("public ").append(typeVariablesDeclaration)
-                .append(originalMethod.getAnnotatedReturnType().getType().getTypeName()).append(" ")
-                .append(originalMethod.getName()).append("(").append(parameters).append(") ").append(throwsClause)
-                .append("{\n");
+        String returnTypeDeclaration = executableResolver.getReturnType(delegatedClass, originalMethod);
+        stringBuilder.append(indent).append("public ").append(typeVariablesDeclaration).append(returnTypeDeclaration)
+                .append(" ").append(originalMethod.getName()).append("(").append(parameters).append(") ")
+                .append(throwsClause).append("{\n");
         String delegateCall = String.format("super.%s(%s)", originalMethod.getName(), parameterNames);
         doubleIndents(stringBuilder, config).append(getProxyMethodBodyContent(config, originalMethod, delegateCall))
                 .append("\n");
         closeMethod(stringBuilder, config);
     }
 
+    private String generateParameters(Method originalMethod, Parameter[] parameters) {
+        List<String> parameterTypes = executableResolver.getParameterTypes(delegatedClass, originalMethod);
+        List<String> stringRepresentations = new ArrayList<>(parameters.length);
+        for (int i = 0; i < parameters.length; ++i) {
+            Parameter parameter = parameters[i];
+            String parameterType = parameter.isVarArgs() ? parameterTypes.get(i).replaceFirst("\\[]$", "...")
+                    : parameterTypes.get(i);
+            String stringRepresentation = parameterType + " " + parameter.getName();
+            stringRepresentations.add(stringRepresentation);
+        }
+        return String.join(", ", stringRepresentations);
+    }
+
+    private String generateThrowClause(Method originalMethod) {
+        List<String> exceptionTypes = executableResolver.getExceptionTypes(delegatedClass, originalMethod);
+        String exceptions = String.join(", ", exceptionTypes);
+        return exceptions.isEmpty() ? exceptions : String.format("throws %s ", exceptions);
+    }
+
     private String getTypeVariables(Method method) {
-        String typeVariablesDeclaration = ClassMemberUtil.generateTypeVariablesDeclaration(method);
+        String typeVariablesDeclaration = ClassMemberUtil.generateBoundedTypeVariablesDeclaration(method);
         return typeVariablesDeclaration.isEmpty() ? typeVariablesDeclaration : typeVariablesDeclaration + " ";
     }
 }

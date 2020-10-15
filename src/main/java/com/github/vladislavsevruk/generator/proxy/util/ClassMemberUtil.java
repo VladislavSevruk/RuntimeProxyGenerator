@@ -49,9 +49,22 @@ public final class ClassMemberUtil {
      * @param genericDeclaration <code>GenericDeclaration</code> with type variables.
      * @return <code>String</code> with type variables declaration.
      */
-    public static String generateTypeVariablesDeclaration(GenericDeclaration genericDeclaration) {
+    public static String generateBoundedTypeVariablesDeclaration(GenericDeclaration genericDeclaration) {
         String typeVariablesDeclaration = Arrays.stream(genericDeclaration.getTypeParameters())
                 .map(ClassMemberUtil::generateTypeVariableDeclaration).collect(Collectors.joining(", "));
+        return typeVariablesDeclaration.isEmpty() ? typeVariablesDeclaration
+                : String.format("<%s>", typeVariablesDeclaration);
+    }
+
+    /**
+     * Generates string with superclass type variables declaration for received class member.
+     *
+     * @param genericDeclaration <code>GenericDeclaration</code> with type variables.
+     * @return <code>String</code> with type variables declaration.
+     */
+    public static String generateUnboundedTypeVariablesDeclaration(Class<?> genericDeclaration) {
+        String typeVariablesDeclaration = Arrays.stream(genericDeclaration.getTypeParameters())
+                .map(TypeVariable::toString).collect(Collectors.joining(", "));
         return typeVariablesDeclaration.isEmpty() ? typeVariablesDeclaration
                 : String.format("<%s>", typeVariablesDeclaration);
     }

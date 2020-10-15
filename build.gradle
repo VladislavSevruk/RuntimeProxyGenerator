@@ -53,7 +53,7 @@ dependencies {
             "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     )
     api(
-            "com.github.vladislavsevruk:type-resolver:${typeResolverVersion}",
+            "com.github.vladislavsevruk:type-string-representation-resolver:${typeStringRepresentationResolverVersion}",
             "com.github.vladislavsevruk:java-class-generator:${javaClassGeneratorVersion}"
     )
 }

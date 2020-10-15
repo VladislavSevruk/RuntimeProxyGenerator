@@ -21,49 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.vladislavsevruk.generator.proxy.source.schema;
+package com.github.vladislavsevruk.generator.proxy.data;
 
-import com.github.vladislavsevruk.generator.java.type.SchemaEntity;
-import com.github.vladislavsevruk.generator.proxy.util.ClassMemberUtil;
+import java.util.List;
 
-/**
- * Schema entity with common information of delegated class.
- *
- * @see SchemaEntity
- */
-public class DelegatedClassSchema implements SchemaEntity {
-
-    private Class<?> delegatedClass;
-
-    public DelegatedClassSchema(Class<?> delegateClazz) {
-        this.delegatedClass = delegateClazz;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getName() {
-        return delegatedClass.getSimpleName();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getPackage() {
-        return delegatedClass.getPackage().getName();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getParameterizedDeclaration() {
-        return getName() + ClassMemberUtil.generateUnboundedTypeVariablesDeclaration(delegatedClass);
-    }
-
-    protected Class<?> delegatedClass() {
-        return delegatedClass;
-    }
-}
+public class TestClassExtendsParameterized extends TestClass<List<String>, RuntimeException> {}

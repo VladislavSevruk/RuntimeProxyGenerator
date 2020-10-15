@@ -25,12 +25,15 @@ package com.github.vladislavsevruk.generator.proxy;
 
 import com.github.vladislavsevruk.generator.proxy.data.FinalTestClass;
 import com.github.vladislavsevruk.generator.proxy.data.TestClass;
+import com.github.vladislavsevruk.generator.proxy.data.TestClassExtendsParameterized;
 import com.github.vladislavsevruk.generator.proxy.data.TestClassWithPrivateConstructor;
 import com.github.vladislavsevruk.generator.proxy.source.generator.SimpleProxySourceTestGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 class ProxyFactoryTest {
 
@@ -82,6 +85,14 @@ class ProxyFactoryTest {
     }
 
     @Test
+    void createProxyForClassThatExtendsParameterizedClassTest() {
+        ProxyFactory<TestClassExtendsParameterized> proxyFactory = newProxyFactory(TestClassExtendsParameterized.class);
+        TestClassExtendsParameterized testClass = proxyFactory.newInstance();
+        Assertions.assertNotEquals(TestClassExtendsParameterized.class, testClass.getClass());
+        checkThatMethodsWereOverridden(testClass.getClass());
+    }
+
+    @Test
     void createProxyForFinalClassTest() {
         ProxyFactory<FinalTestClass> proxyFactory = newProxyFactory(FinalTestClass.class);
         FinalTestClass testClass = proxyFactory.newInstance();
@@ -93,6 +104,7 @@ class ProxyFactoryTest {
         ProxyFactory<TestClass> proxyFactory = newProxyFactory(TestClass.class);
         TestClass testClass = proxyFactory.newInstance();
         Assertions.assertNotEquals(TestClass.class, testClass.getClass());
+        checkThatMethodsWereOverridden(testClass.getClass());
     }
 
     @Test
@@ -106,6 +118,16 @@ class ProxyFactoryTest {
         Assertions.assertNotEquals(constructor2, constructor3);
         Assertions.assertNotEquals(constructor2, constructor4);
         Assertions.assertNotEquals(constructor3, constructor4);
+    }
+
+    private void checkThatMethodsWereOverridden(Class<?> testClass) {
+        // check that methods were overridden and doesn't use superclass method
+        for (Method method : testClass.getMethods()) {
+            int modifiers = method.getModifiers();
+            if (!Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
+                Assertions.assertEquals(method.getDeclaringClass(), testClass);
+            }
+        }
     }
 
     private <T> ProxyFactory<T> newProxyFactory(Class<T> clazz) {
