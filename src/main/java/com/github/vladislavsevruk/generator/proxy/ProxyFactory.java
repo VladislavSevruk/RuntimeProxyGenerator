@@ -26,11 +26,10 @@ package com.github.vladislavsevruk.generator.proxy;
 import com.github.vladislavsevruk.generator.proxy.source.compiler.JavaSourceCompiler;
 import com.github.vladislavsevruk.generator.proxy.source.generator.ProxySourceCodeGenerator;
 import com.github.vladislavsevruk.generator.proxy.source.loader.JavaByteClassLoader;
-import com.github.vladislavsevruk.resolver.resolver.ExecutableTypeResolver;
-import com.github.vladislavsevruk.resolver.resolver.ExecutableTypeResolverImpl;
+import com.github.vladislavsevruk.resolver.resolver.executable.ExecutableTypeMetaResolver;
+import com.github.vladislavsevruk.resolver.resolver.executable.ExecutableTypeResolver;
 import com.github.vladislavsevruk.resolver.type.TypeMeta;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
@@ -50,13 +49,13 @@ import java.util.stream.Collectors;
  *
  * @param <T> type of target class.
  */
+@Log4j2
 public final class ProxyFactory<T> {
 
     private static final Map<String, Class<?>> RESOLVED_CLASSES = new ConcurrentHashMap<>();
-    private static final Logger logger = LogManager.getLogger(ProxyFactory.class);
 
     private final Class<T> clazz;
-    private final ExecutableTypeResolver executableTypeResolver = new ExecutableTypeResolverImpl();
+    private final ExecutableTypeResolver<TypeMeta<?>> executableTypeResolver = new ExecutableTypeMetaResolver();
     private final ProxySourceCodeGenerator proxyContentGenerator;
 
     public ProxyFactory(Class<T> clazz, ProxySourceCodeGenerator proxyContentGenerator) {
@@ -101,12 +100,11 @@ public final class ProxyFactory<T> {
                         .defineClass(proxyClassName, compiledByteFileObject)).orElse(null);
     }
 
-    @SuppressWarnings("unchecked")
     private T createInstance(Class<? extends T> clazzToCreate, Class<?>[] receivedParameterTypes, Object[] args) {
         try {
             return getConstructor(clazzToCreate, receivedParameterTypes).newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-            logger.warn(String.format("Failed to create '%s' instance by constructor with %s args.",
+            log.warn(String.format("Failed to create '%s' instance by constructor with %s args.",
                     clazzToCreate.getName(), Arrays.asList(receivedParameterTypes)), ex);
             return null;
         }
@@ -115,7 +113,7 @@ public final class ProxyFactory<T> {
     @SuppressWarnings("unchecked")
     private Constructor<? extends T> getConstructor(Class<? extends T> clazzToCreate,
             Class<?>[] receivedParameterTypes) {
-        logger.debug("Picking '{}' constructor for {} parameters.", clazzToCreate.getName(),
+        log.debug("Picking '{}' constructor for {} parameters.", clazzToCreate.getName(),
                 Arrays.asList(receivedParameterTypes));
         Constructor<?> firstFoundCandidate = null;
         for (Constructor<?> constructor : clazzToCreate.getConstructors()) {
@@ -139,7 +137,7 @@ public final class ProxyFactory<T> {
     @SuppressWarnings("unchecked")
     private Class<? extends T> getProxyClass() {
         if (Modifier.isFinal(clazz.getModifiers())) {
-            logger.warn("'{}' class is final.", clazz.getName());
+            log.warn("'{}' class is final.", clazz.getName());
             return clazz;
         }
         String proxyClassName = String.format("%s.%sProxy", clazz.getPackage().getName(), clazz.getSimpleName());
@@ -177,7 +175,7 @@ public final class ProxyFactory<T> {
     }
 
     private void logExactMatchingConstructor(List<TypeMeta<?>> typeMetas) {
-        logger.debug(() -> {
+        log.debug(() -> {
             String parameterTypes = typeMetas.stream().map(TypeMeta::getType).map(Class::getName)
                     .collect(Collectors.joining(", "));
             return String.format("Found constructor with [%s] parameters.", parameterTypes);
@@ -185,7 +183,7 @@ public final class ProxyFactory<T> {
     }
 
     private void logPickedMatchingConstructor(Constructor<?> firstFoundCandidate) {
-        logger.debug(() -> {
+        log.debug(() -> {
             String parameterTypes = Arrays.stream(firstFoundCandidate.getAnnotatedParameterTypes())
                     .map(AnnotatedType::getType).map(Type::getTypeName).collect(Collectors.joining(", "));
             return String.format("Picked constructor with [%s] parameters.", parameterTypes);

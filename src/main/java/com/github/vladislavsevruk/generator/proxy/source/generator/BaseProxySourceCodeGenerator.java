@@ -33,8 +33,7 @@ import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.source.generator.constructor.ProxyClassConstructorGenerator;
 import com.github.vladislavsevruk.generator.proxy.source.generator.provider.ClonedJavaClassContentGeneratorProvider;
 import com.github.vladislavsevruk.generator.proxy.source.schema.ProxyClassSchema;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,9 +41,8 @@ import java.util.Collections;
 /**
  * Contains base logic for dynamic proxy source code generators.
  */
+@Log4j2
 public abstract class BaseProxySourceCodeGenerator implements ProxySourceCodeGenerator {
-
-    private static final Logger logger = LogManager.getLogger(BaseProxySourceCodeGenerator.class);
 
     /**
      * {@inheritDoc}
@@ -52,7 +50,7 @@ public abstract class BaseProxySourceCodeGenerator implements ProxySourceCodeGen
     @Override
     public String generate(Class<?> clazz) {
         SchemaObject proxyClassSchemaObject = new ProxyClassSchema(clazz);
-        logger.debug("Generating source code for '{}' class.", proxyClassSchemaObject.getName());
+        log.debug("Generating source code for '{}' class.", proxyClassSchemaObject.getName());
         JavaClassContentGeneratorProvider classContentGeneratorProvider = ClassGenerationContextManager.getContext()
                 .getClassContentGeneratorPicker().pickClassContentGeneratorProvider(proxyClassSchemaObject);
         JavaClassContentGeneratorProvider localContentGeneratorProvider = getLocalContentGeneratorProvider(
