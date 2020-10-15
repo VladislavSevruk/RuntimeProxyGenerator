@@ -28,8 +28,7 @@ import com.github.vladislavsevruk.generator.java.generator.ClassElementGenerator
 import com.github.vladislavsevruk.generator.java.provider.JavaClassContentGeneratorProvider;
 import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,9 +40,8 @@ import java.util.function.Predicate;
  *
  * @see JavaClassContentGeneratorProvider
  */
+@Log4j2
 public class ClonedJavaClassContentGeneratorProvider implements JavaClassContentGeneratorProvider {
-
-    private static final Logger logger = LogManager.getLogger(ClonedJavaClassContentGeneratorProvider.class);
 
     @Getter
     private ClassElementGenerator classDeclarationGenerator;
@@ -60,7 +58,7 @@ public class ClonedJavaClassContentGeneratorProvider implements JavaClassContent
     private ClassElementGenerator packageGenerator;
 
     public ClonedJavaClassContentGeneratorProvider(JavaClassContentGeneratorProvider provider) {
-        logger.debug("Cloning generators from '{}' provider.", provider.getClass().getName());
+        log.debug("Cloning generators from '{}' provider.", provider.getClass().getName());
         this.classDeclarationGenerator = provider.getClassDeclarationGenerator();
         this.constructorGenerators = new ArrayList<>(provider.getConstructorGenerators());
         this.fieldGenerators = new ArrayList<>(provider.getFieldGenerators());

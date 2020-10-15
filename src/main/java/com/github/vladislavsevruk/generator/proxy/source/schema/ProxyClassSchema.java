@@ -79,7 +79,7 @@ public class ProxyClassSchema extends DelegatedClassSchema implements SchemaObje
      */
     @Override
     public String getParameterizedDeclaration() {
-        return getName() + ClassMemberUtil.generateTypeVariablesDeclaration(delegatedClass());
+        return getName() + ClassMemberUtil.generateBoundedTypeVariablesDeclaration(delegatedClass());
     }
 
     /**

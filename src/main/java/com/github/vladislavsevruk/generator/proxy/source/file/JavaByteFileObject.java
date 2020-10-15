@@ -37,7 +37,7 @@ public class JavaByteFileObject extends SimpleJavaFileObject {
     private ByteArrayOutputStream outputStream;
 
     public JavaByteFileObject(String name) {
-        super(URI.create("bytes:///" + name + name.replaceAll("\\.", "/")), Kind.CLASS);
+        super(URI.create("bytes:///" + name + name.replace(".", "/")), Kind.CLASS);
         outputStream = new ByteArrayOutputStream();
     }
 

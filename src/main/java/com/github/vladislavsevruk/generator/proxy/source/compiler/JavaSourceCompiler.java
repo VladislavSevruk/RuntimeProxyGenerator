@@ -27,8 +27,7 @@ package com.github.vladislavsevruk.generator.proxy.source.compiler;
 import com.github.vladislavsevruk.generator.proxy.source.file.JavaByteFileManager;
 import com.github.vladislavsevruk.generator.proxy.source.file.JavaByteFileObject;
 import com.github.vladislavsevruk.generator.proxy.source.file.JavaSourceFileObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -43,9 +42,8 @@ import java.util.Locale;
 /**
  * Compiles source code and defines compiled classes on runtime for further interaction.
  */
+@Log4j2
 public final class JavaSourceCompiler {
-
-    private static final Logger logger = LogManager.getLogger(JavaSourceCompiler.class);
 
     private JavaSourceCompiler() {
     }
@@ -58,7 +56,7 @@ public final class JavaSourceCompiler {
      * @return <code>JavaByteFileObject</code> with compiled byte code.
      */
     public static JavaByteFileObject compile(String name, String content) {
-        logger.debug("Compiling '{}' class.", name);
+        log.debug("Compiling '{}' class.", name);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null)) {
@@ -68,20 +66,20 @@ public final class JavaSourceCompiler {
             CompilationTask compilationTask = compiler.getTask(null, javaByteFileManager, diagnostics, null, null,
                     Collections.singletonList(javaFileObject));
             if (Boolean.TRUE.equals(compilationTask.call())) {
-                logger.debug("Successfully compiled '{}' class.", name);
+                log.debug("Successfully compiled '{}' class.", name);
                 return javaByteFileObject;
             } else {
-                logger.debug("Failed to compile '{}' class.", name);
+                log.debug("Failed to compile '{}' class.", name);
                 logCompileErrors(diagnostics);
             }
         } catch (IOException ioEx) {
-            logger.warn(ioEx);
+            log.warn(ioEx);
         }
         return null;
     }
 
     private static void logCompileErrors(DiagnosticCollector<JavaFileObject> diagnostics) {
-        diagnostics.getDiagnostics().forEach(diagnostic -> logger
+        diagnostics.getDiagnostics().forEach(diagnostic -> log
                 .warn("{} at {} ({}, {}): {}.", diagnostic.getKind(), diagnostic.getSource().getName(),
                         diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic.getMessage(Locale.US)));
     }

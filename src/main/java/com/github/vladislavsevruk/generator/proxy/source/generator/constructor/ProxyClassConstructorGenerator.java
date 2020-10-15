@@ -27,8 +27,8 @@ import com.github.vladislavsevruk.generator.java.config.JavaClassGeneratorConfig
 import com.github.vladislavsevruk.generator.java.generator.method.BaseMethodGenerator;
 import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.util.ClassMemberUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.EqualsAndHashCode;
+import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
 /**
  * Generates proxy class constructors that simply delegate call to superclass.
  */
+@Log4j2
+@EqualsAndHashCode(callSuper = true)
 public class ProxyClassConstructorGenerator extends BaseMethodGenerator {
-
-    private static final Logger logger = LogManager.getLogger(ProxyClassConstructorGenerator.class);
 
     private Class<?> delegatedClass;
 
@@ -54,11 +54,11 @@ public class ProxyClassConstructorGenerator extends BaseMethodGenerator {
      */
     @Override
     public String generate(JavaClassGeneratorConfig config, SchemaObject schemaObject) {
-        logger.debug("Generating proxy constructors for {} class.", schemaObject.getName());
+        log.debug("Generating proxy constructors for {} class.", schemaObject.getName());
         List<Constructor<?>> nonPrivateConstructors = Arrays.stream(delegatedClass.getConstructors())
                 .filter(ClassMemberUtil::isNonPrivate).collect(Collectors.toList());
         if (nonPrivateConstructors.isEmpty()) {
-            logger.info("There is no any non-private constructor for {}.", delegatedClass.getName());
+            log.info("There is no any non-private constructor for {}.", delegatedClass.getName());
             return "";
         }
         StringBuilder stringBuilder = new StringBuilder();
