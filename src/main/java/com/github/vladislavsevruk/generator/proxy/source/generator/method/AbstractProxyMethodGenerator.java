@@ -29,7 +29,6 @@ import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.util.ClassMemberUtil;
 import com.github.vladislavsevruk.resolver.resolver.executable.BaseExecutableTypeResolver;
 import com.github.vladislavsevruk.resolver.resolver.executable.ExecutableStringRepresentationResolver;
-import lombok.EqualsAndHashCode;
 import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Method;
@@ -43,7 +42,6 @@ import java.util.stream.Collectors;
  * Contains base logic for generating proxy methods with ability to delegate call to initial class.
  */
 @Log4j2
-@EqualsAndHashCode(callSuper = true)
 public abstract class AbstractProxyMethodGenerator extends BaseMethodGenerator {
 
     private Class<?> delegatedClass;

@@ -27,7 +27,6 @@ import com.github.vladislavsevruk.generator.java.config.JavaClassGeneratorConfig
 import com.github.vladislavsevruk.generator.java.generator.method.BaseMethodGenerator;
 import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.util.ClassMemberUtil;
-import lombok.EqualsAndHashCode;
 import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Constructor;
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
  * Generates proxy class constructors that simply delegate call to superclass.
  */
 @Log4j2
-@EqualsAndHashCode(callSuper = true)
 public class ProxyClassConstructorGenerator extends BaseMethodGenerator {
 
     private Class<?> delegatedClass;
