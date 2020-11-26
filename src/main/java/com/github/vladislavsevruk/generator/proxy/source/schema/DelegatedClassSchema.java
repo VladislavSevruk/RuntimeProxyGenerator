@@ -40,6 +40,13 @@ public class DelegatedClassSchema implements SchemaEntity {
     }
 
     /**
+     * Returns delegated class represented by this schema entity.
+     */
+    public Class<?> delegatedClass() {
+        return delegatedClass;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -61,9 +68,5 @@ public class DelegatedClassSchema implements SchemaEntity {
     @Override
     public String getParameterizedDeclaration() {
         return getName() + ClassMemberUtil.generateUnboundedTypeVariablesDeclaration(delegatedClass);
-    }
-
-    protected Class<?> delegatedClass() {
-        return delegatedClass;
     }
 }

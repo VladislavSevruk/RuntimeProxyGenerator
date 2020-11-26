@@ -42,10 +42,10 @@ public class ProxyClassSchema extends DelegatedClassSchema implements SchemaObje
     private final DelegatedClassSchema delegatedClassSchema;
     private final String proxyClassName;
 
-    public ProxyClassSchema(Class<?> delegatedClass) {
+    public ProxyClassSchema(Class<?> delegatedClass, String proxyClassPrefix) {
         super(delegatedClass);
         delegatedClassSchema = new DelegatedClassSchema(delegatedClass);
-        proxyClassName = getProxyClassName(delegatedClass);
+        proxyClassName = getProxyClassName(delegatedClass, proxyClassPrefix);
     }
 
     /**
@@ -90,7 +90,7 @@ public class ProxyClassSchema extends DelegatedClassSchema implements SchemaObje
         return delegatedClassSchema;
     }
 
-    protected String getProxyClassName(Class<?> clazz) {
-        return clazz.getSimpleName() + "Proxy";
+    protected String getProxyClassName(Class<?> clazz, String proxyClassPrefix) {
+        return proxyClassPrefix + clazz.getSimpleName() + "Proxy";
     }
 }

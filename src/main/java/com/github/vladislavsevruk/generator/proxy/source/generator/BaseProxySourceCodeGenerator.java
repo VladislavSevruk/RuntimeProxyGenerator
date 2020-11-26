@@ -29,7 +29,6 @@ import com.github.vladislavsevruk.generator.java.context.ClassGenerationContextM
 import com.github.vladislavsevruk.generator.java.generator.ClassElementCollectionGenerator;
 import com.github.vladislavsevruk.generator.java.generator.ClassElementGenerator;
 import com.github.vladislavsevruk.generator.java.provider.JavaClassContentGeneratorProvider;
-import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.source.generator.constructor.ProxyClassConstructorGenerator;
 import com.github.vladislavsevruk.generator.proxy.source.generator.provider.ClonedJavaClassContentGeneratorProvider;
 import com.github.vladislavsevruk.generator.proxy.source.schema.ProxyClassSchema;
@@ -48,13 +47,12 @@ public abstract class BaseProxySourceCodeGenerator implements ProxySourceCodeGen
      * {@inheritDoc}
      */
     @Override
-    public String generate(Class<?> clazz) {
-        SchemaObject proxyClassSchemaObject = new ProxyClassSchema(clazz);
+    public String generate(ProxyClassSchema proxyClassSchemaObject) {
         log.debug("Generating source code for '{}' class.", proxyClassSchemaObject.getName());
         JavaClassContentGeneratorProvider classContentGeneratorProvider = ClassGenerationContextManager.getContext()
                 .getClassContentGeneratorPicker().pickClassContentGeneratorProvider(proxyClassSchemaObject);
         JavaClassContentGeneratorProvider localContentGeneratorProvider = getLocalContentGeneratorProvider(
-                classContentGeneratorProvider, clazz);
+                classContentGeneratorProvider, proxyClassSchemaObject.delegatedClass());
         return new JavaClassContentGenerator(localContentGeneratorProvider)
                 .generate(setupJavaClassGeneratorConfig(), proxyClassSchemaObject);
     }
