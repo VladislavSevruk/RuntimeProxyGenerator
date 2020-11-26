@@ -23,6 +23,8 @@
  */
 package com.github.vladislavsevruk.generator.proxy.source.generator;
 
+import com.github.vladislavsevruk.generator.proxy.source.schema.ProxyClassSchema;
+
 /**
  * Generates source code for dynamic proxy.
  */
@@ -30,10 +32,10 @@ package com.github.vladislavsevruk.generator.proxy.source.generator;
 public interface ProxySourceCodeGenerator {
 
     /**
-     * Generates source code for proxying received class.
+     * Generates source code for proxying received schema object.
      *
-     * @param clazz <code>Class</code> to generate proxy source code for.
+     * @param schemaObject <code>ProxyClassSchema</code> to generate proxy source code for.
      * @return <code>String</code> with generated source code.
      */
-    String generate(Class<?> clazz);
+    String generate(ProxyClassSchema schemaObject);
 }
