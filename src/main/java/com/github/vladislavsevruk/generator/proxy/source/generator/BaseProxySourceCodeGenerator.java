@@ -47,14 +47,14 @@ public abstract class BaseProxySourceCodeGenerator implements ProxySourceCodeGen
      * {@inheritDoc}
      */
     @Override
-    public String generate(ProxyClassSchema schemaObject) {
-        log.debug("Generating source code for '{}' class.", schemaObject.getName());
+    public String generate(ProxyClassSchema proxyClassSchemaObject) {
+        log.debug("Generating source code for '{}' class.", proxyClassSchemaObject.getName());
         JavaClassContentGeneratorProvider classContentGeneratorProvider = ClassGenerationContextManager.getContext()
-                .getClassContentGeneratorPicker().pickClassContentGeneratorProvider(schemaObject);
+                .getClassContentGeneratorPicker().pickClassContentGeneratorProvider(proxyClassSchemaObject);
         JavaClassContentGeneratorProvider localContentGeneratorProvider = getLocalContentGeneratorProvider(
-                classContentGeneratorProvider, schemaObject.delegatedClass());
+                classContentGeneratorProvider, proxyClassSchemaObject.delegatedClass());
         return new JavaClassContentGenerator(localContentGeneratorProvider)
-                .generate(setupJavaClassGeneratorConfig(), schemaObject);
+                .generate(setupJavaClassGeneratorConfig(), proxyClassSchemaObject);
     }
 
     protected Collection<ClassElementGenerator> getConstructorsDeclaration(Class<?> clazz) {
