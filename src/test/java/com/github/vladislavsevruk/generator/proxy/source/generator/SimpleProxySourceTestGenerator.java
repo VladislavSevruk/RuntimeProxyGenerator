@@ -31,14 +31,6 @@ import java.util.Collections;
 
 public class SimpleProxySourceTestGenerator extends BaseProxySourceCodeGenerator {
 
-    public SimpleProxySourceTestGenerator() {
-        super();
-    }
-
-    public SimpleProxySourceTestGenerator(String proxyClassPrefix) {
-        super(proxyClassPrefix);
-    }
-
     @Override
     protected Collection<ClassElementGenerator> getMethodsDeclaration(Class<?> clazz) {
         return Collections.singletonList(new DelegateProxyMethodGenerator(clazz));

@@ -42,10 +42,6 @@ public class ProxyClassSchema extends DelegatedClassSchema implements SchemaObje
     private final DelegatedClassSchema delegatedClassSchema;
     private final String proxyClassName;
 
-    public ProxyClassSchema(Class<?> delegatedClass) {
-        this(delegatedClass, "");
-    }
-
     public ProxyClassSchema(Class<?> delegatedClass, String proxyClassPrefix) {
         super(delegatedClass);
         delegatedClassSchema = new DelegatedClassSchema(delegatedClass);

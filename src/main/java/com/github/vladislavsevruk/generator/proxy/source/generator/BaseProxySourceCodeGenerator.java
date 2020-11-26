@@ -29,7 +29,6 @@ import com.github.vladislavsevruk.generator.java.context.ClassGenerationContextM
 import com.github.vladislavsevruk.generator.java.generator.ClassElementCollectionGenerator;
 import com.github.vladislavsevruk.generator.java.generator.ClassElementGenerator;
 import com.github.vladislavsevruk.generator.java.provider.JavaClassContentGeneratorProvider;
-import com.github.vladislavsevruk.generator.java.type.SchemaObject;
 import com.github.vladislavsevruk.generator.proxy.source.generator.constructor.ProxyClassConstructorGenerator;
 import com.github.vladislavsevruk.generator.proxy.source.generator.provider.ClonedJavaClassContentGeneratorProvider;
 import com.github.vladislavsevruk.generator.proxy.source.schema.ProxyClassSchema;
@@ -44,29 +43,18 @@ import java.util.Collections;
 @Log4j2
 public abstract class BaseProxySourceCodeGenerator implements ProxySourceCodeGenerator {
 
-    protected final String proxyClassPrefix;
-
-    protected BaseProxySourceCodeGenerator() {
-        this("");
-    }
-
-    protected BaseProxySourceCodeGenerator(String proxyClassPrefix) {
-        this.proxyClassPrefix = proxyClassPrefix;
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public String generate(Class<?> clazz) {
-        SchemaObject proxyClassSchemaObject = new ProxyClassSchema(clazz, proxyClassPrefix);
-        log.debug("Generating source code for '{}' class.", proxyClassSchemaObject.getName());
+    public String generate(ProxyClassSchema schemaObject) {
+        log.debug("Generating source code for '{}' class.", schemaObject.getName());
         JavaClassContentGeneratorProvider classContentGeneratorProvider = ClassGenerationContextManager.getContext()
-                .getClassContentGeneratorPicker().pickClassContentGeneratorProvider(proxyClassSchemaObject);
+                .getClassContentGeneratorPicker().pickClassContentGeneratorProvider(schemaObject);
         JavaClassContentGeneratorProvider localContentGeneratorProvider = getLocalContentGeneratorProvider(
-                classContentGeneratorProvider, clazz);
+                classContentGeneratorProvider, schemaObject.delegatedClass());
         return new JavaClassContentGenerator(localContentGeneratorProvider)
-                .generate(setupJavaClassGeneratorConfig(), proxyClassSchemaObject);
+                .generate(setupJavaClassGeneratorConfig(), schemaObject);
     }
 
     protected Collection<ClassElementGenerator> getConstructorsDeclaration(Class<?> clazz) {

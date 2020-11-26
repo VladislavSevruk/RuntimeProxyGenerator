@@ -103,8 +103,8 @@ class ProxyFactoryTest {
     @Test
     void createProxyPrefixTest() throws Exception {
         String prefix = "TestPrefix";
-        ProxyFactory<TestClass> proxyFactory = new ProxyFactory<>(TestClass.class,
-                new SimpleProxySourceTestGenerator(prefix), prefix);
+        ProxyFactory<TestClass> proxyFactory = new ProxyFactory<>(TestClass.class, new SimpleProxySourceTestGenerator(),
+                prefix);
         TestClass testClass = proxyFactory.newInstance(1);
         String simpleName = String.format("%s%sProxy", prefix, TestClass.class.getSimpleName());
         Assertions.assertEquals(simpleName, testClass.getClass().getSimpleName());

@@ -26,6 +26,7 @@ package com.github.vladislavsevruk.generator.proxy;
 import com.github.vladislavsevruk.generator.proxy.source.compiler.JavaSourceCompiler;
 import com.github.vladislavsevruk.generator.proxy.source.generator.ProxySourceCodeGenerator;
 import com.github.vladislavsevruk.generator.proxy.source.loader.JavaByteClassLoader;
+import com.github.vladislavsevruk.generator.proxy.source.schema.ProxyClassSchema;
 import com.github.vladislavsevruk.resolver.resolver.executable.ExecutableTypeMetaResolver;
 import com.github.vladislavsevruk.resolver.resolver.executable.ExecutableTypeResolver;
 import com.github.vladislavsevruk.resolver.type.TypeMeta;
@@ -56,7 +57,7 @@ public final class ProxyFactory<T> {
 
     private final Class<T> clazz;
     private final ExecutableTypeResolver<TypeMeta<?>> executableTypeResolver = new ExecutableTypeMetaResolver();
-    private final String proxyClassPrefix;
+    private final ProxyClassSchema proxyClassSchema;
     private final ProxySourceCodeGenerator proxyContentGenerator;
 
     public ProxyFactory(Class<T> clazz, ProxySourceCodeGenerator proxyContentGenerator) {
@@ -66,7 +67,7 @@ public final class ProxyFactory<T> {
     public ProxyFactory(Class<T> clazz, ProxySourceCodeGenerator proxyContentGenerator, String proxyClassPrefix) {
         this.clazz = clazz;
         this.proxyContentGenerator = proxyContentGenerator;
-        this.proxyClassPrefix = proxyClassPrefix;
+        this.proxyClassSchema = new ProxyClassSchema(clazz, proxyClassPrefix);
     }
 
     /**
@@ -146,10 +147,9 @@ public final class ProxyFactory<T> {
             log.warn("'{}' class is final.", clazz.getName());
             return clazz;
         }
-        String proxyClassName = String
-                .format("%s.%s%sProxy", clazz.getPackage().getName(), proxyClassPrefix, clazz.getSimpleName());
+        String proxyClassName = String.format("%s.%s", proxyClassSchema.getPackage(), proxyClassSchema.getName());
         if (!isAlreadyCompiled(proxyClassName)) {
-            String proxyClassContent = proxyContentGenerator.generate(clazz);
+            String proxyClassContent = proxyContentGenerator.generate(proxyClassSchema);
             Class<? extends T> compiledClass = compileClass(proxyClassName, proxyClassContent);
             Class<? extends T> resultedClass = compiledClass != null ? compiledClass : clazz;
             RESOLVED_CLASSES.put(proxyClassName, resultedClass);
