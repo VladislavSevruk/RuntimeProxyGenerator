@@ -56,11 +56,17 @@ public final class ProxyFactory<T> {
 
     private final Class<T> clazz;
     private final ExecutableTypeResolver<TypeMeta<?>> executableTypeResolver = new ExecutableTypeMetaResolver();
+    private final String proxyClassPrefix;
     private final ProxySourceCodeGenerator proxyContentGenerator;
 
     public ProxyFactory(Class<T> clazz, ProxySourceCodeGenerator proxyContentGenerator) {
+        this(clazz, proxyContentGenerator, "");
+    }
+
+    public ProxyFactory(Class<T> clazz, ProxySourceCodeGenerator proxyContentGenerator, String proxyClassPrefix) {
         this.clazz = clazz;
         this.proxyContentGenerator = proxyContentGenerator;
+        this.proxyClassPrefix = proxyClassPrefix;
     }
 
     /**
@@ -140,7 +146,8 @@ public final class ProxyFactory<T> {
             log.warn("'{}' class is final.", clazz.getName());
             return clazz;
         }
-        String proxyClassName = String.format("%s.%sProxy", clazz.getPackage().getName(), clazz.getSimpleName());
+        String proxyClassName = String
+                .format("%s.%s%sProxy", clazz.getPackage().getName(), proxyClassPrefix, clazz.getSimpleName());
         if (!isAlreadyCompiled(proxyClassName)) {
             String proxyClassContent = proxyContentGenerator.generate(clazz);
             Class<? extends T> compiledClass = compileClass(proxyClassName, proxyClassContent);

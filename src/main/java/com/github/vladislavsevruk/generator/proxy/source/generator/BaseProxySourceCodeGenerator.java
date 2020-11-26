@@ -44,12 +44,22 @@ import java.util.Collections;
 @Log4j2
 public abstract class BaseProxySourceCodeGenerator implements ProxySourceCodeGenerator {
 
+    protected final String proxyClassPrefix;
+
+    protected BaseProxySourceCodeGenerator() {
+        this("");
+    }
+
+    protected BaseProxySourceCodeGenerator(String proxyClassPrefix) {
+        this.proxyClassPrefix = proxyClassPrefix;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public String generate(Class<?> clazz) {
-        SchemaObject proxyClassSchemaObject = new ProxyClassSchema(clazz);
+        SchemaObject proxyClassSchemaObject = new ProxyClassSchema(clazz, proxyClassPrefix);
         log.debug("Generating source code for '{}' class.", proxyClassSchemaObject.getName());
         JavaClassContentGeneratorProvider classContentGeneratorProvider = ClassGenerationContextManager.getContext()
                 .getClassContentGeneratorPicker().pickClassContentGeneratorProvider(proxyClassSchemaObject);

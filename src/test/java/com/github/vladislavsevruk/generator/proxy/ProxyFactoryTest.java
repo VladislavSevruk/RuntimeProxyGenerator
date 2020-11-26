@@ -28,6 +28,7 @@ import com.github.vladislavsevruk.generator.proxy.data.TestClass;
 import com.github.vladislavsevruk.generator.proxy.data.TestClassExtendsParameterized;
 import com.github.vladislavsevruk.generator.proxy.data.TestClassWithPrivateConstructor;
 import com.github.vladislavsevruk.generator.proxy.source.generator.SimpleProxySourceTestGenerator;
+import com.github.vladislavsevruk.generator.proxy.source.loader.JavaByteClassLoader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -97,6 +98,18 @@ class ProxyFactoryTest {
         ProxyFactory<FinalTestClass> proxyFactory = newProxyFactory(FinalTestClass.class);
         FinalTestClass testClass = proxyFactory.newInstance();
         Assertions.assertEquals(FinalTestClass.class, testClass.getClass());
+    }
+
+    @Test
+    void createProxyPrefixTest() throws Exception {
+        String prefix = "TestPrefix";
+        ProxyFactory<TestClass> proxyFactory = new ProxyFactory<>(TestClass.class,
+                new SimpleProxySourceTestGenerator(prefix), prefix);
+        TestClass testClass = proxyFactory.newInstance(1);
+        String simpleName = String.format("%s%sProxy", prefix, TestClass.class.getSimpleName());
+        Assertions.assertEquals(simpleName, testClass.getClass().getSimpleName());
+        String expectedProxyClassName = String.format("%s.%s", TestClass.class.getPackage().getName(), simpleName);
+        Assertions.assertNotNull(JavaByteClassLoader.instance().loadClass(expectedProxyClassName));
     }
 
     @Test
