@@ -105,7 +105,7 @@ class ProxyFactoryTest {
         String prefix = "TestPrefix";
         ProxyFactory<TestClass> proxyFactory = new ProxyFactory<>(TestClass.class, new SimpleProxySourceTestGenerator(),
                 prefix);
-        TestClass testClass = proxyFactory.newInstance(1);
+        TestClass testClass = proxyFactory.newInstance();
         String simpleName = String.format("%s%sProxy", prefix, TestClass.class.getSimpleName());
         Assertions.assertEquals(simpleName, testClass.getClass().getSimpleName());
         String expectedProxyClassName = String.format("%s.%s", TestClass.class.getPackage().getName(), simpleName);
